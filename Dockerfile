@@ -59,6 +59,15 @@ RUN mkdir -p /app/server/data && chown -R node:node /app/server/data
 ARG FREELLMAPI_COMMIT_SHA
 ENV FREELLMAPI_COMMIT_SHA=${FREELLMAPI_COMMIT_SHA}
 
+# Install Litestream
+ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz /tmp/litestream.tar.gz
+RUN tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz && \
+    chmod +x /usr/local/bin/litestream && \
+    rm /tmp/litestream.tar.gz
+
+# Copy Litestream config
+COPY litestream.yml /etc/litestream.yml
+
 USER node
 
 EXPOSE 3001
@@ -67,4 +76,4 @@ VOLUME ["/app/server/data"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3001) + '/api/ping').then((res) => { if (!res.ok) process.exit(1); }).catch(() => process.exit(1));"
 
-CMD ["node", "server/dist/index.js"]
+CMD ["litestream", "replicate", "-exec", "node server/dist/index.js"]
