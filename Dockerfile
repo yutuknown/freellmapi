@@ -59,7 +59,11 @@ RUN mkdir -p /app/server/data && chown -R node:node /app/server/data
 ARG FREELLMAPI_COMMIT_SHA
 ENV FREELLMAPI_COMMIT_SHA=${FREELLMAPI_COMMIT_SHA}
 
-# Install Litestream
+# Install ca-certificates and Litestream
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
 ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz /tmp/litestream.tar.gz
 RUN tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz && \
     chmod +x /usr/local/bin/litestream && \
